@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About LaneLayer - NFT Lane</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      .card {
+        background: white;
+        border-radius: 12px;
+        padding: 40px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 2.5em;
+      }
+
+      h2 {
+        color: #667eea;
+        margin-top: 30px;
+        margin-bottom: 15px;
+        font-size: 1.8em;
+      }
+
+      h3 {
+        color: #555;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        font-size: 1.3em;
+      }
+
+      p {
+        color: #666;
+        margin-bottom: 15px;
+        font-size: 1.1em;
+      }
+
+      ul,
+      ol {
+        color: #666;
+        margin-left: 30px;
+        margin-bottom: 15px;
+      }
+
+      li {
+        margin-bottom: 8px;
+      }
+
+      code {
+        background: #f4f4f4;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: "Courier New", monospace;
+        color: #e83e8c;
+      }
+
+      .highlight {
+        background: #fff3cd;
+        padding: 15px;
+        border-left: 4px solid #ffc107;
+        margin: 20px 0;
+        border-radius: 4px;
+      }
+
+      .button {
+        display: inline-block;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        margin-top: 20px;
+        font-weight: 600;
+        transition: transform 0.2s;
+      }
+
+      .button:hover {
+        transform: translateY(-2px);
+      }
+
+      .diagram {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+        text-align: center;
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <h1>🚀 Welcome to LaneLayer</h1>
+        <p>
+          Your first entry point to understanding Bitcoin-anchored execution
+          environments.
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>What is LaneLayer?</h2>
+        <p>
+          LaneLayer is a Bitcoin-anchored execution environment that enables you
+          to build and deploy applications (called "lanes") that process
+          transactions independently while being anchored to Bitcoin's security
+          and decentralization.
+        </p>
+        <p>
+          Think of it as a way to build decentralized applications that leverage
+          Bitcoin's security model while providing the flexibility of smart
+          contract-like execution.
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>What is a Derived Lane?</h2>
+        <p>
+          A <strong>derived lane</strong> is a containerized application that
+          runs independently but receives transaction data from the Core Lane
+          (the main Bitcoin-anchored execution layer).
+        </p>
+
+        <div class="highlight">
+          <strong>Key Characteristics:</strong>
+          <ul>
+            <li>Runs as a separate HTTP server container</li>
+            <li>
+              Receives transaction data via the <code>/submit</code> endpoint
+            </li>
+            <li>Processes data independently (like this NFT minting app)</li>
+            <li>Can query Core Lane state when needed</li>
+            <li>Deployed using the LaneLayer CLI</li>
+          </ul>
+        </div>
+
+        <div class="diagram">
+          <p><strong>Architecture Flow:</strong></p>
+          <p>Bitcoin → Core Lane → Derived Lane (this app) → Your Logic</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>How This NFT App Works</h2>
+
+        <h3>1. Minting NFTs</h3>
+        <p>You can mint NFTs in two ways:</p>
+        <ul>
+          <li>
+            <strong>Direct API:</strong> Use the web interface or POST to
+            <code>/mint</code> endpoint
+          </li>
+          <li>
+            <strong>Via Core Lane:</strong> Send transaction data to Core Lane,
+            which forwards it to this app via <code>/submit</code>
+          </li>
+        </ul>
+
+        <h3>2. Storage</h3>
+        <p>
+          NFTs are currently stored in-memory (for simplicity). In production,
+          you'd use a database or persistent storage.
+        </p>
+
+        <h3>3. API Endpoints</h3>
+        <ul>
+          <li><code>GET /health</code> - Health check</li>
+          <li><code>POST /mint</code> - Mint a new NFT</li>
+          <li><code>GET /nfts</code> - List all NFTs</li>
+          <li><code>GET /nft/{token_id}</code> - Get specific NFT</li>
+          <li>
+            <code>POST /submit</code> - Receive transactions from Core Lane
+          </li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>How to Interact with This App</h2>
+
+        <h3>Using the Web Interface</h3>
+        <ol>
+          <li>
+            Fill in the mint form with token ID (optional), owner address, and
+            metadata
+          </li>
+          <li>Click "Mint NFT"</li>
+          <li>View your minted NFTs in the gallery below</li>
+        </ol>
+
+        <h3>Using the API Directly</h3>
+        <p>Example mint request:</p>
+        <div class="diagram">
+          <code>
+            POST /mint<br />
+            {<br />
+            &nbsp;&nbsp;"token_id": "1",<br />
+            &nbsp;&nbsp;"owner": "0x1234...",<br />
+            &nbsp;&nbsp;"metadata": {"name": "My NFT", "description":
+            "Cool!"}<br />
+            }
+          </code>
+        </div>
+
+        <h3>Via Core Lane (When Configured)</h3>
+        <p>
+          When Core Lane is configured to send transactions to this derived
+          lane, they are forwarded to the <code>/submit</code> endpoint. The
+          endpoint is ready to receive and process submissions in the format
+          that Core Lane sends. For now, you can test this using the
+          <code>lane submit</code> command or by sending POST requests directly
+          to <code>/submit</code>.
+        </p>
+        <div class="highlight">
+          <strong>Note:</strong> The full Core Lane → Runner → Container
+          integration requires additional configuration. The
+          <code>/submit</code> endpoint is implemented and ready, but Core Lane
+          needs to be configured to route transactions to this specific
+          container.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Getting Started with LaneLayer</h2>
+        <p>To build your own derived lane:</p>
+        <ol>
+          <li>Install the CLI: <code>npm install -g @lanelayer/cli</code></li>
+          <li>
+            Create a project: <code>lane create myapp --template python</code>
+          </li>
+          <li>Develop your app in <code>app.py</code></li>
+          <li>Test locally: <code>lane up dev</code></li>
+          <li>Build for production: <code>lane build prod</code></li>
+          <li>Deploy: <code>lane push &lt;registry&gt;</code></li>
+        </ol>
+
+        <p>
+          Check out the
+          <a href="https://github.com/lanelayer/cli" target="_blank"
+            >LaneLayer CLI documentation</a
+          >
+          for more details.
+        </p>
+      </div>
+
+      <div class="card" style="text-align: center">
+        <a href="/" class="button">← Back to NFT Minting</a>
+      </div>
+    </div>
+  </body>
+</html>

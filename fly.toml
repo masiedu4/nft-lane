@@ -1,0 +1,49 @@
+# fly.toml app configuration file for NFT Lane
+# A simple derived lane for minting and managing NFTs on LaneLayer
+
+app = 'nft-lane'
+primary_region = 'cdg'
+
+[build]
+  # Build will use the Dockerfile in the project root
+  # Use: lane build prod && lane push <registry> to build and push
+
+[env]
+  PORT = '8080'
+  HTTP_HOST = '0.0.0.0'
+
+[processes]
+  app = 'python3 /app/app.py'
+
+[[services]]
+  protocol = 'tcp'
+  internal_port = 8080
+  processes = ['app']
+
+  [[services.ports]]
+    port = 80
+    handlers = ['http']
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ['tls', 'http']
+
+  [services.concurrency]
+    type = 'connections'
+    hard_limit = 500
+    soft_limit = 200
+
+  [[services.http_checks]]
+    interval = '15s'
+    timeout = '10s'
+    grace_period = '1m0s'
+    method = 'get'
+    path = '/health'
+    protocol = 'http'
+
+[[vm]]
+  cpu_kind = 'shared'
+  cpus = 1
+  memory_mb = 512
+

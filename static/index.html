@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NFT Lane - Mint & View NFTs</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      header {
+        text-align: center;
+        color: white;
+        margin-bottom: 40px;
+      }
+
+      h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+      }
+
+      .subtitle {
+        font-size: 1.2em;
+        opacity: 0.9;
+      }
+
+      .card {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333;
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+      }
+
+      input:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 100px;
+      }
+
+      button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 14px 28px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      .nft-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+      }
+
+      .nft-card {
+        background: #f8f9fa;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      .nft-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .nft-id {
+        font-size: 1.2em;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 10px;
+      }
+
+      .nft-owner {
+        color: #666;
+        font-size: 0.9em;
+        margin-bottom: 10px;
+      }
+
+      .nft-metadata {
+        background: white;
+        padding: 10px;
+        border-radius: 6px;
+        font-size: 0.9em;
+        color: #333;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .minted-at {
+        color: #999;
+        font-size: 0.8em;
+        margin-top: 10px;
+      }
+
+      .message {
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: none;
+      }
+
+      .message.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .message.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #999;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🎨 NFT Lane</h1>
+        <p class="subtitle">Mint and manage NFTs on LaneLayer</p>
+        <a
+          href="/about.html"
+          style="
+            color: white;
+            text-decoration: underline;
+            margin-top: 10px;
+            display: inline-block;
+          "
+          >Learn about LaneLayer</a
+        >
+      </header>
+
+      <div class="card">
+        <h2>Mint New NFT</h2>
+        <div id="message" class="message"></div>
+        <form id="mintForm">
+          <div class="form-group">
+            <label for="tokenId"
+              >Token ID (optional - auto-generated if empty)</label
+            >
+            <input type="text" id="tokenId" placeholder="e.g., 1, 2, 3..." />
+          </div>
+          <div class="form-group">
+            <label for="owner">Owner Address</label>
+            <input
+              type="text"
+              id="owner"
+              placeholder="e.g., 0x1234..."
+              value="unknown"
+            />
+          </div>
+          <div class="form-group">
+            <label for="metadata">Metadata (JSON format)</label>
+            <textarea
+              id="metadata"
+              placeholder='{"name": "My NFT", "description": "A cool NFT", "image": "https://..."}'
+            ></textarea>
+          </div>
+          <button type="submit">Mint NFT</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Your NFTs</h2>
+        <button onclick="loadNFTs()" style="margin-bottom: 20px">
+          Refresh List
+        </button>
+        <div id="nftList" class="loading">Loading NFTs...</div>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE = window.location.origin;
+
+      function showMessage(text, type) {
+        const messageEl = document.getElementById("message");
+        messageEl.textContent = text;
+        messageEl.className = `message ${type}`;
+        messageEl.style.display = "block";
+        setTimeout(() => {
+          messageEl.style.display = "none";
+        }, 5000);
+      }
+
+      async function mintNFT(e) {
+        e.preventDefault();
+
+        const tokenId = document.getElementById("tokenId").value.trim();
+        const owner =
+          document.getElementById("owner").value.trim() || "unknown";
+        const metadataText = document.getElementById("metadata").value.trim();
+
+        let metadata = {};
+        if (metadataText) {
+          try {
+            metadata = JSON.parse(metadataText);
+          } catch (err) {
+            showMessage("Invalid JSON in metadata field", "error");
+            return;
+          }
+        }
+
+        const payload = {
+          owner: owner,
+          metadata: metadata,
+        };
+
+        if (tokenId) {
+          payload.token_id = tokenId;
+        }
+
+        try {
+          const response = await fetch(`${API_BASE}/mint`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            showMessage(
+              `NFT minted successfully! Token ID: ${data.token_id}`,
+              "success"
+            );
+            document.getElementById("mintForm").reset();
+            document.getElementById("owner").value = "unknown";
+            loadNFTs();
+          } else {
+            showMessage(data.message || "Error minting NFT", "error");
+          }
+        } catch (err) {
+          showMessage("Network error: " + err.message, "error");
+        }
+      }
+
+      async function loadNFTs() {
+        const nftList = document.getElementById("nftList");
+        nftList.innerHTML = '<div class="loading">Loading NFTs...</div>';
+
+        try {
+          const response = await fetch(`${API_BASE}/nfts`);
+          const data = await response.json();
+
+          if (response.ok && data.nfts && data.nfts.length > 0) {
+            nftList.innerHTML = '<div class="nft-grid"></div>';
+            const grid = nftList.querySelector(".nft-grid");
+
+            data.nfts.forEach((nft) => {
+              const card = document.createElement("div");
+              card.className = "nft-card";
+              card.innerHTML = `
+                            <div class="nft-id">Token #${nft.token_id}</div>
+                            <div class="nft-owner">Owner: ${nft.owner}</div>
+                            <div class="nft-metadata">${JSON.stringify(
+                              nft.metadata,
+                              null,
+                              2
+                            )}</div>
+                            <div class="minted-at">Minted: ${new Date(
+                              nft.minted_at
+                            ).toLocaleString()}</div>
+                        `;
+              grid.appendChild(card);
+            });
+          } else {
+            nftList.innerHTML =
+              '<div class="empty-state">No NFTs minted yet. Mint your first NFT above!</div>';
+          }
+        } catch (err) {
+          nftList.innerHTML = `<div class="empty-state">Error loading NFTs: ${err.message}</div>`;
+        }
+      }
+
+      document.getElementById("mintForm").addEventListener("submit", mintNFT);
+      loadNFTs();
+    </script>
+  </body>
+</html>

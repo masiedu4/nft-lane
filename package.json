@@ -1,0 +1,11 @@
+{
+  "name": "nft-lane",
+  "version": "0.1.0",
+  "private": true,
+  "description": "NFT Minting Lane - A simple derived lane for minting and managing NFTs on LaneLayer",
+  "scripts": {
+    "build": "lane build prod",
+    "dev": "lane up dev",
+    "test": "curl http://localhost:8080/health"
+  }
+}
