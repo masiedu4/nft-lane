@@ -190,23 +190,26 @@
           <ul>
             <li>Accepts raw binary data or JSON</li>
             <li>Receives metadata via X- prefixed HTTP headers</li>
-            <li>Processes NFT minting requests when JSON contains token_id or metadata fields</li>
+            <li>
+              Processes NFT minting requests when JSON contains token_id or
+              metadata fields
+            </li>
             <li>Handles all data processing for the lane</li>
           </ul>
-          <p style="margin-top: 15px;">
+          <p style="margin-top: 15px">
             <strong>Example submission format:</strong>
           </p>
           <div class="code-block">
-{<br />
-&nbsp;&nbsp;"token_id": "1",<br />
-&nbsp;&nbsp;"owner": "0x1234...",<br />
-&nbsp;&nbsp;"metadata": {<br />
-&nbsp;&nbsp;&nbsp;&nbsp;"name": "My NFT",<br />
-&nbsp;&nbsp;&nbsp;&nbsp;"description": "A cool NFT"<br />
-&nbsp;&nbsp;}<br />
-}
+            {<br />
+            &nbsp;&nbsp;"token_id": "1",<br />
+            &nbsp;&nbsp;"owner": "0x1234...",<br />
+            &nbsp;&nbsp;"metadata": {<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;"name": "My NFT",<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;"description": "A cool NFT"<br />
+            &nbsp;&nbsp;}<br />
+            }
           </div>
-          <p style="margin-top: 15px;">
+          <p style="margin-top: 15px">
             <strong>Headers:</strong>
           </p>
           <ul>
@@ -225,7 +228,7 @@
           forwarded to this derived lane, it sends the data to the
           <code>/submit</code> endpoint. The lane then:
         </p>
-        <ol style="color: #666; margin-left: 30px; margin-bottom: 15px;">
+        <ol style="color: #666; margin-left: 30px; margin-bottom: 15px">
           <li>Receives the data and metadata headers</li>
           <li>Parses the data (JSON or binary)</li>
           <li>Processes NFT minting if the data contains NFT-related fields</li>
@@ -243,28 +246,15 @@
       <div class="card">
         <h2>Testing</h2>
         <p>
-          You can test the <code>/submit</code> endpoint using the LaneLayer CLI:
+          You can test the <code>/submit</code> endpoint using the LaneLayer
+          CLI:
         </p>
         <div class="code-block">
-lane submit --data '{"token_id": "1", "owner": "0x1234...", "metadata": {"name": "Test NFT"}}' \
-  --header "X-Forwarded-From: core-lane" \
-  --header "X-User: 0x1234..." \
-  --header "X-Content-Type: application/json"
+          lane submit --data '{"token_id": "1", "owner": "0x1234...",
+          "metadata": {"name": "Test NFT"}}' \ --header "X-Forwarded-From:
+          core-lane" \ --header "X-User: 0x1234..." \ --header "X-Content-Type:
+          application/json"
         </div>
-      </div>
-
-      <div class="card" style="text-align: center; padding: 20px">
-        <h3 style="margin-bottom: 15px">Need Help?</h3>
-        <p style="color: #666; margin-bottom: 10px">
-          Contact support through your dashboard
-        </p>
-        <p style="font-size: 1.1em">
-          <a
-            href="mailto:support@fansted.com"
-            style="color: #667eea; text-decoration: none; font-weight: 600"
-            >support@fansted.com</a
-          >
-        </p>
       </div>
     </div>
   </body>
