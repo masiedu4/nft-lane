@@ -55,6 +55,7 @@ sequenceDiagram
 ### Current Integration Status
 
 **✅ Fully Functional**:
+
 - Frontend minting works.
 - RPC connection and forwarding works.
 - Core Lane sequencing works.
@@ -82,36 +83,16 @@ npm install -g @lanelayer/cli
 lane create nft-lane --template python
 ```
 
-### Development
+### Production Deployment
 
-1. Start the development environment:
-
-```bash
-cd nft-lane
-lane up dev
-```
-
-2. Access the app:
-
-   - Web UI: http://localhost:8080
-   - Health check: http://localhost:8080/health
-   - Submit endpoint: http://localhost:8080/submit
-
-3. Stop the environment:
-
-```bash
-lane down
-```
-
-### End-to-End Development Workflow
-
-Follow these steps to run the full stack (Core Lane + Derived Lane + Frontend) and verify end-to-end functionality.
+Follow these steps to deploy the full LaneLayer stack with Bitcoin anchoring.
 
 #### 1. Start the Backend Infrastructure
 
 Open a terminal and start the Core Lane and Derived Lane environments.
 
 **Step 1.1: Start Core Lane**
+
 ```bash
 cd ~/Code/core-lane
 ./scripts/dev-environment.sh start
@@ -119,6 +100,7 @@ cd ~/Code/core-lane
 
 **Step 1.2: Start Derived Lane (NFT Lane)**
 Open a new terminal tab/window:
+
 ```bash
 # Export necessary environment variables (ensure snapshot path is correct for your build)
 export DERIVED_DA_ADDRESS=0x0000000000000000000000000000000000000665
@@ -135,6 +117,7 @@ cd ~/Code/core-lane
 The frontend is configured to proxy RPC requests to the derived lane to handle CORS.
 
 Open a new terminal tab/window:
+
 ```bash
 cd ~/Code/nft-lane/frontend
 npm install
@@ -157,11 +140,13 @@ tail -f ~/Code/core-lane/derived-lane.log | grep "Transaction forwarded"
 ```
 
 You should see logs indicating the transaction was forwarded to Core Lane:
+
 ```log
 INFO core_lane_node::rpc: Transaction forwarded to upstream Core Lane RPC core_tx_hash=0x...
 ```
 
 ### Building for Production
+
 container:
 
 ```bash
@@ -257,4 +242,3 @@ flyctl deploy
 Or use the Fly.io dashboard to deploy from the registry.
 
 The `fly.toml` file is already configured for deployment.
-

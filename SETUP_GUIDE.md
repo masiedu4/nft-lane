@@ -1,270 +1,176 @@
-# LaneLayer Derived Lane Setup Guide
+# NFT Lane - Production Setup Guide
 
-Complete step-by-step guide to set up and test a derived lane.
+Complete guide for deploying NFT Lane on LaneLayer with full Bitcoin anchoring.
 
 ## Prerequisites
 
-- Docker installed and running
-- Rust toolchain installed
-- Node.js and npm installed
-- `cast` (Foundry) installed
+- Docker and Docker Buildx
+- Rust toolchain (`cargo`)
+- Node.js 18+ and npm
+- Foundry (`cast` command)
+- LaneLayer CLI: `npm i -g @lanelayer/cli`
 
-## Step 0: Install LaneLayer CLI and Use Sample Project
+---
 
-```bash
-# Install LaneLayer CLI
-npm i -g @lanelayer/cli
+## 🏗️ Production Setup
 
-# Use the sample-python project (or create your own)
-cd ~/Code/cli/packages/sample-python
+Full LaneLayer architecture with Bitcoin anchoring.
+
+### Architecture
+
+```
+Frontend (3000)
+    ↓
+RPC Bridge (/api/rpc)
+    ↓
+Derived Lane Node (9545)
+    ↓
+Your Lane (Cartesi VM)
+    ↓
+Core Lane (8546)
+    ↓
+Bitcoin Regtest
 ```
 
-**What this does:**
-
-- Installs the LaneLayer CLI globally
-- Uses the sample Python project as a starting point
-- The sample project includes a simple HTTP server with `/health` and `/submit` endpoints
-
-**Note:** You can also create your own project with `lane create my-lane --template python`, but for this guide we'll use the sample-python project.
-
-## Step 1: Build Core Lane
-
-Navigate to the Core Lane repository and build with Cargo:
+### Step 1: Build Core Lane
 
 ```bash
-cd ~/Code/core-lane
+cd /Users/michaelasiedu/Code/core-lane
 cargo build
 ```
 
-**What this does:**
-
-- Builds the Core Lane node binary in debug mode (faster for development)
-- The dev environment script expects `target/debug/core-lane-node`
-- For production, you can use `cargo build --release` or build with Docker
-
-**Alternative (Docker):** If you prefer Docker, you can build the container:
+### Step 2: Build Cartesi Snapshot
 
 ```bash
-docker build -t core-lane:dev .
+cd /Users/michaelasiedu/Code/nft-lane
+lane build prod
 ```
 
-However, the dev environment script uses the Cargo-built binary directly.
+**Output location:**
 
-## Step 2: Build Your Lane with Cartesi Machine Snapshot
+```
+~/.cache/lane/6074828c/d78434d4/vc-cm-snapshot-release.squashfs
+```
 
-Navigate to your lane project and build it:
+### Step 3: Start Core Lane
+
+**Terminal 1:**
 
 ```bash
-cd ~/Code/cli/packages/sample-python  # or your project directory
-lane build prod --guest-agent-image ghcr.io/lanelayer/lane-guest-agent@sha256:ca4809fa4f3c708cf919f2e7c5971b38f76348a27228d7cf04c51f01a8bf8373
-```
-
-**What this does:**
-
-- Builds your lane container
-- Creates a Cartesi Machine snapshot
-- Saves snapshot to cache directory
-
-**Output location:** `~/.cache/lane/[hash]/[hash]/vc-cm-snapshot-release`
-
-## Step 3: Find the Cartesi Machine Snapshot
-
-After the build completes, note the cache directory path from the output. It will look like:
-
-```
-Cache directory: ~/.cache/lane/[hash]/[hash]
-```
-
-The snapshot directory is: `[cache-dir]/vc-cm-snapshot-release`
-
-**Verify it exists:**
-
-```bash
-ls -la ~/.cache/lane/*/vc-cm-snapshot-release
-```
-
-## Step 4: Start Core Lane Dev Environment
-
-```bash
-cd ~/Code/core-lane
+cd /Users/michaelasiedu/Code/core-lane
 ./scripts/dev-environment.sh start
 ```
 
-**What this does:**
+**Wait for:** `[SUCCESS] Development environment started successfully!`
 
-- Starts Bitcoin regtest network in Docker
-- Creates BDK wallet for Core Lane
-- Starts Core Lane node on port 8546
-- Funds test addresses (Anvil accounts)
-- Starts filler bot for transaction processing
+**Starts:**
 
-**Wait for:** "Development environment started successfully!"
+- Bitcoin regtest network (Docker)
+- Core Lane node on port 8546
+- Filler bot (mines blocks every 10 seconds)
 
-**RPC Endpoints:**
+### Step 4: Start Derived Lane
 
-- **Core Lane RPC:** `http://127.0.0.1:8546`
-- **Derived Lane RPC:** `http://127.0.0.1:9545` (starts in next step)
-
-## Step 5: Set Environment Variables and Start Derived Lane
-
-The derived lane runs as a separate process. Set these environment variables and start it:
+**Terminal 2:**
 
 ```bash
-export DERIVED_DA_ADDRESS=0x0000000000000000000000000000000000000665
-export LANELAYER_HTTP_RUNNER_SNAPSHOT=~/.cache/lane/[hash]/[hash]/vc-cm-snapshot-release
-export CORE_LANE_DA_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-```
+export CARTESI_SNAPSHOT_PATH="/Users/michaelasiedu/.cache/lane/6074828c/d78434d4/vc-cm-snapshot-release.squashfs"
+export DERIVED_DA_ADDRESS="0xa980b2407851c1844ce205e72a1db237"
 
-**Replace `[hash]/[hash]`** with the actual path from Step 3.
-
-**What these do:**
-
-- `DERIVED_DA_ADDRESS`: The data availability address for your derived lane
-- `LANELAYER_HTTP_RUNNER_SNAPSHOT`: Path to the Cartesi Machine snapshot
-- `CORE_LANE_DA_PRIVATE_KEY`: Private key for signing transactions forwarded to Core Lane (use Anvil account #0 key)
-
-**Start the derived lane:**
-
-```bash
-cd ~/Code/core-lane
+cd /Users/michaelasiedu/Code/core-lane
 ./scripts/derived-dev-environment.sh start
 ```
 
-**What this does:**
+**Wait for:** Derived Lane node to start on port 9545
 
-- Starts the derived lane node on port 9545
-- Connects to Core Lane RPC to sync blocks
-- Processes transactions and executes them in the Cartesi Machine
+### Step 5: Start Frontend
 
-**Keep this running** in a separate terminal.
-
-## Step 6: Send Transaction to Derived Lane
-
-In a new terminal, send data to the derived lane using port **9545**:
+**Terminal 3:**
 
 ```bash
+cd /Users/michaelasiedu/Code/nft-lane/frontend
+BACKEND_URL=http://localhost:9545 npm run dev
+```
+
+Open http://localhost:3000
+
+---
+
+## 🧪 Testing
+
+### Frontend UI
+
+1. Open http://localhost:3000
+2. Fill in form:
+   - Token ID: `my-nft-1`
+   - Owner: `Your Name`
+   - Name: `Test NFT`
+   - Description: `Minted on LaneLayer`
+3. Click "Mint NFT"
+4. Watch Terminal 2 (Derived Lane) logs for processing
+
+### CLI Testing
+
+```bash
+NFT_DATA='{"token_id":"test-1","owner":"0x1234","metadata":{"name":"Test"}}'
+HEX_DATA=$(echo -n "$NFT_DATA" | xxd -p | tr -d '\n' | sed 's/^/0x/')
+
 cast send \
   --rpc-url http://127.0.0.1:9545 \
   --private-key 0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a \
   0x0000000000000000000000000000000000000042 \
   --value 0 \
-  0x48656c6c6f
+  $HEX_DATA
 ```
 
-**What this does:**
+---
 
-- Sends transaction from Anvil account #2 to address `0x000042`
-- Includes data payload (`0x48656c6c6f` = "Hello" in hex)
-- Transaction is processed by the derived lane and executed in the Cartesi Machine
-- Your Python function in the lane will receive and process the data
+## 🔑 Ports & Addresses
 
-**Address details:**
+### Ports
 
-- **From:** `0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC` (Anvil account #2)
-- **To:** `0x0000000000000000000000000000000000000042` (Derived lane address)
-- **Private key:** `0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a`
-- **RPC URL:** `http://127.0.0.1:9545` (derived lane, not core lane!)
+| Service      | Port | Purpose        |
+| ------------ | ---- | -------------- |
+| Frontend     | 3000 | User interface |
+| Derived Lane | 9545 | Lane RPC       |
+| Core Lane    | 8546 | Settlement     |
 
-**Expected result:** You should see a successful transaction with logs indicating "Cartesi machine executed: success=true" in the transaction logs.
+### Test Accounts (Anvil)
 
-## Troubleshooting
+**Account #2** (recommended for testing):
 
-### Address has no balance on derived lane
-
-The derived lane needs to be funded separately from Core Lane. You can fund it by making a Core Lane burn:
-
-```bash
-cd ~/Code/core-lane
-export DERIVED_DA_ADDRESS=0x0000000000000000000000000000000000000665
-export CORE_LANE_DA_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-./scripts/derived-dev-environment.sh burn
+```
+Address:     0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC
+Private Key: 0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a
 ```
 
-This burns funds from Core Lane to the derived lane address.
+**Account #0** (Core Lane controller):
 
-### Derived lane RPC not available (port 9545)
-
-- Ensure environment variables are set: `echo $DERIVED_DA_ADDRESS $LANELAYER_HTTP_RUNNER_SNAPSHOT $CORE_LANE_DA_PRIVATE_KEY`
-- Ensure Core Lane is running: `curl http://127.0.0.1:8546`
-- Check derived lane logs: `tail -f ~/Code/core-lane/derived-lane.log`
-- Verify derived lane is running: `curl http://127.0.0.1:9545`
-
-### Snapshot not found
-
-Verify the snapshot path:
-
-```bash
-ls -la $LANELAYER_HTTP_RUNNER_SNAPSHOT
+```
+Address:     0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+Private Key: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 ```
 
-Make sure the path is correct and the directory exists.
+---
 
-### Transaction timeout or wrong RPC
-
-- **Important:** Use port **9545** for derived lane transactions, not 8546
-- Port 8546 is for Core Lane RPC
-- Port 9545 is for Derived Lane RPC
-- Ensure Core Lane is running: `curl http://127.0.0.1:8546`
-- Check derived lane is running: `curl http://127.0.0.1:9545`
-- Check Core Lane logs: `tail -f ~/Code/core-lane/core-lane.log`
-- Check Derived Lane logs: `tail -f ~/Code/core-lane/derived-lane.log`
-
-### CORE_LANE_DA_PRIVATE_KEY not set
-
-If you see "CORE_LANE_DA_PRIVATE_KEY env var not set", make sure to export it before starting the derived lane:
+## 🧹 Cleanup
 
 ```bash
-export CORE_LANE_DA_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-```
-
-This is the private key for Anvil account #0, used to sign transactions forwarded to Core Lane.
-
-### Address already in use
-
-If the Core Lane node panics with `Address already in use`, port 8546 or 9545 is likely occupied.
-
-Find and kill the process:
-
-```bash
-lsof -i :8546
-lsof -i :9545
-kill -9 <PID>
-```
-
-## Cleanup
-
-Stop all services:
-
-```bash
-# Stop Derived Lane
-cd ~/Code/core-lane
-./scripts/derived-dev-environment.sh stop
-
-# Stop Core Lane dev environment
-cd ~/Code/core-lane
+# Terminal 1: Stop Core Lane
+cd /Users/michaelasiedu/Code/core-lane
 ./scripts/dev-environment.sh stop
+
+# Terminal 2: Stop Derived Lane
+Ctrl+C
+
+# Terminal 3: Stop Frontend
+Ctrl+C
 ```
 
-## Key Files and Locations
+---
 
-- **Core Lane RPC:** `http://127.0.0.1:8546`
-- **Derived Lane RPC:** `http://127.0.0.1:9545`
-- **Core Lane logs:** `~/Code/core-lane/core-lane.log`
-- **Derived Lane logs:** `~/Code/core-lane/derived-lane.log`
-- **Snapshot cache:** `~/.cache/lane/[hash]/[hash]/vc-cm-snapshot-release`
-- **Sample project:** `~/Code/cli/packages/sample-python`
+## 📚 Additional Resources
 
-## Test Addresses (Anvil Default Accounts)
-
-| Index | Address                                      | Private Key                                                          |
-| ----- | -------------------------------------------- | -------------------------------------------------------------------- |
-| 0     | `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266` | `0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80` |
-| 1     | `0x70997970C51812dc3A010C7d01b50e0d17dc79C8` | `0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d` |
-| 2     | `0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC` | `0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a` |
-| 3     | `0x90F79bf6EB2c4f870365E785982E1f101E93b906` | `0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6` |
-
-**Note on funding:**
-
-- Core Lane addresses are automatically funded by burning 1,000,000 sats (0.01 BTC) to each address when the dev environment starts
-- Derived lane addresses need to be funded separately by making a Core Lane burn transaction
-- Use `./scripts/derived-dev-environment.sh burn` to fund addresses on the derived lane
+- **README.md:** Project overview and architecture
+- **app.py:** Backend `/submit` endpoint logic
+- **frontend/app/api/rpc/route.ts:** RPC bridge implementation

@@ -142,11 +142,6 @@ app.router.add_post("/submit", submit_handler)
 # CORS preflight
 app.router.add_options("/{path:.*}", options_handler)
 
-# Serve static files
-static_dir = os.path.join(os.path.dirname(__file__), "static")
-if os.path.exists(static_dir):
-    app.router.add_static("/", static_dir, show_index=True)
-
 
 def run_app():
     """Function to run the app, used by watchgod/watchfiles"""

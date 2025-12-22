@@ -1,5 +1,4 @@
-
-import MintForm from '@/components/MintForm';
+import MintForm from "@/components/MintForm";
 
 export default function Home() {
   return (
@@ -10,15 +9,15 @@ export default function Home() {
           Mint NFTs directly to the Derived Lane.
         </p>
       </header>
-      
+
       <main className="flex flex-col gap-8 items-center w-full max-w-2xl mx-auto">
         <MintForm />
       </main>
-      
+
       <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center text-gray-500">
         <div className="flex gap-2 items-center">
           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-          Derived Lane: http://127.0.0.1:9545
+          Derived Lane: http://localhost:3000/api/rpc
         </div>
       </footer>
     </div>

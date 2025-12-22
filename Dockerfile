@@ -39,7 +39,6 @@ RUN useradd --create-home --shell /bin/bash app
 
 # Copy application files
 COPY ./app.py /app/app.py
-COPY ./static /app/static
 RUN cd /app; python3 -m compileall --invalidation-mode checked-hash .
 
 # Set up environment
